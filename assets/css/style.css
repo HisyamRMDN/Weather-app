@@ -215,8 +215,7 @@ focus-visible {
     height: 48px;
     display: grid;
     place-items: center;
-    border-radius: var(--radius-pill);
-    transition: var(--transition-short);
+    border-radius: var(--radius-circle);
 }
 
 .has-state {
@@ -237,7 +236,6 @@ focus-visible {
     inset: 0;
     border-radius: inherit;
     clip-path: circle(100% at 50% 50%);
-    opacity: 0;
     transition: var(--transition-short);
 }
 
@@ -257,6 +255,20 @@ focus-visible {
     100% {
         clip-path: circle(100% at 50% 50%);
     }
+}
+
+.btn-primary {
+    background-color: var(--primary);
+    color: var(--on-primary);
+    height: 48px;
+    max-width: max-content;
+    line-height: 48px;
+    padding: 12px 16px;
+    border-radius: var(--radius-pill);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding-inline: 16px;
 }
 
 /*-----------------------------------*\
