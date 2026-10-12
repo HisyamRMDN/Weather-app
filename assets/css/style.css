@@ -332,6 +332,19 @@ focus-visible {
     font-size: var(--label-2);
 }
 
+.fade-in {
+    animation: fadeIn 250ms ease forwards;
+}
+
+@keyframes fade-in {
+    0% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
 /*-----------------------------------*\
 #HEADER
 \*-----------------------------------*/
@@ -485,7 +498,7 @@ main {
 article.container {
     position: relative;
     display: grid;
-    grid-template-columns: 280px minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr);
     gap: 24px;
     height: 100%;
     overflow-y: auto;
@@ -563,13 +576,43 @@ article.container::before {
 /*-----------------------------------*\
   #HIGHLIGHT
 \*-----------------------------------*/
-.forecast-card .title-2 {
-    margin-block-end: 0;
-}
 
-.forecast-card :is(.card-item, .icon-wrapper) {
+.forecast-card .icon-wrapper {
     display: flex;
     align-items: center;
+    gap: 8px;
+    flex: 1;
+}
+
+.forecast-card .card-item {
+    display: flex;
+    align-items: space-between;
+    justify-content: space-between;
+}
+
+.forecast-card .card-item:not(:last-child) {
+    margin-block-end: 12px;
+}
+
+.forecast-card .label-1 {
+    color: var(--on-surface-variant);
+    font-weight: var(--weight-semiBold);
+}
+
+.forecast-card .card-item > .label-1 {
+    flex: 1;
+}
+
+.forecast-card .card-item > .label-1:nth-child(2) {
+    text-align: center;
+}
+
+.forecast-card .card-item > .label-1:nth-child(3) {
+    text-align: right;
+}
+
+.forecast-card .title-2 {
+    margin-block-end: 0;
 }
 
 .forecast-card .card-item:not(:last-child) {
@@ -583,11 +626,6 @@ article.container::before {
 .forecast-card .label-1 {
     color: var(--on-surface-variant);
     font-weight: var(--weight-semiBold);
-}
-
-.forecast-card .card-item > .label-1 {
-    width: 100%;
-    text-align: right;
 }
 
 /*-----------------------------------*\
@@ -732,7 +770,7 @@ article.container::before {
 
 .loading {
     position: absolute;
-    top: 70px;
+    top: 0;
     left: 0;
     width: 100%;
     height: 100%;
