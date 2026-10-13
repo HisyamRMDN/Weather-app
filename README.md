@@ -27,22 +27,20 @@ Berikut adalah struktur file dan folder dalam proyek ini:
 Weather-app/
 ├── assets/
 │   ├── css/
-│   │   └── style.css               # File styling utama
+│   │   └── style.css            # Styling utama & Glassmorphism design system
 │   ├── font/
-│   │   └── material-symbol-rounded.woff2 # Ikon lokal
+│   │   └── material-symbol-rounded.woff2
 │   ├── images/
-│   │   ├── weather_icons/          # Kumpulan ikon kondisi cuaca (siang & malam)
-│   │   ├── logo.png                # Logo aplikasi
-│   │   └── openweather.png         # Atribusi OpenWeather
+│   │   └── weather_icons/       # Asset ikon kondisi cuaca SVG/PNG
 │   └── js/
-│       ├── api.js                  # Konfigurasi dan fungsi pemanggilan API
-│       ├── app.js                  # Logika utama aplikasi (DOM dan event listener)
-│       ├── module.js               # Kumpulan fungsi utilitas/helper
-│       └── route.js                # Penanganan rute pencarian/lokasi
-├── index.html                      # Halaman utama HTML
-├── favicon.svg                     # Ikon tab browser
-├── style-guide.md                  # Panduan styling/palet warna
-└── README.md                       # Dokumentasi proyek
+│       ├── api.js               # Service layer API OpenWeatherMap
+│       ├── app.js               # Main Controller & DOM Manipulation
+│       ├── module.js            # Helper utilitas (Konversi tanggal, waktu, unit)
+│       ├── particles.js         # Engine partikel HTML5 Canvas 2D
+│       └── route.js             # Client-side hash routing system
+├── index.html                   # Entry point aplikasi
+├── favicon.svg                  # Brand favicon
+└── README.md                    # Dokumentasi teknis proyek
 ```
 
 ## 🚀 Cara Menjalankan Secara Lokal (Getting Started)
@@ -94,5 +92,3 @@ Kontribusi selalu diterima! Jika Anda ingin menambahkan fitur baru, memperbaiki 
 5. Buat sebuah **Pull Request**.
 
 ---
-
-_Dibuat untuk mempelajari integrasi API dan Vanilla JavaScript._
