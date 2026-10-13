@@ -136,8 +136,6 @@ body {
     background-color: var(--background);
     color: var(--on-background);
     font-size: var(--body-3);
-    /* overflow: hidden; */
-    height: 300vh;
 }
 
 focus-visible {
@@ -816,7 +814,7 @@ article.container::before {
 }
 
 /*-----------------------------------*\
-  #FOOTER
+#FOOTER
 \*-----------------------------------*/
 .footer,
 .footer .body-3 {
@@ -831,7 +829,7 @@ article.container::before {
     text-align: center;
     gap: 12px 24px;
     margin-block-start: 28px;
-    display: none;
+    flex-direction: column;
 }
 
 .fade-in .footer {
@@ -843,7 +841,7 @@ article.container::before {
 }
 
 /*-----------------------------------*\
-  #MEDIA QUERIES
+#MEDIA QUERIES
 \*-----------------------------------*/
 
 @media (min-width: 768px) {

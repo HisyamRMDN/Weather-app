@@ -75,9 +75,6 @@ const errorContent = document.querySelector("[data-error-content]");
 // @params {string} lat - latitude
 // @params {string} lon - longitude
 export const updateWeather = function (lat, lon) {
-    // loading.style.display = "grid";
-    container.style.overflowY = "hidden";
-    // container.classList.remove("fade-in");
     errorContent.style.display = "none";
 
     const currentWeatherSection = document.querySelector("[data-current-weather]");
@@ -275,18 +272,7 @@ export const updateWeather = function (lat, lon) {
             forecastSection.innerHTML = `
             <h2 class="title-2">5 DAYS FORECAST</h2>
             <div class="card card-lg forecast-card">
-                <ul>
-                    <li class="card-item">
-                        <div class="icon-wrapper">
-                            <img src="./assets/images/weather_icons/01n.png" width="36" height="36" alt="Overcast Clouds" class="weather-icon" />
-                            <span class="span">
-                                <p class="title-2">25&deg;<sup>c</sup></p>
-                            </span>
-                        </div>
-
-                        <p class="label-1">17 Feb</p>
-                        <p class="label-1">Friday</p>
-                    </li>
+                <ul data-forecast-list>
                 </ul>
             </div>
             `;
@@ -303,15 +289,24 @@ export const updateWeather = function (lat, lon) {
                 li.classList.add("card-item");
                 li.innerHTML = `
                 <div class="icon-wrapper">
-                    <img src="./assets/images/weather_icons/${icon}.png" width="36" height="36" alt="${description}" class="weather-icon" />
+                    <img src="./assets/images/weather_icons/${icon}.png" width="36" height="36" alt="${description}" class="weather-icon" title="${description}" />
                     <span class="span">
                         <p class="title-2">${parseInt(temp_max)}&deg;<sup>c</sup></p>
                     </span>
-                </div>
-`;
+                    </div>
+                <p class="label-1">${date.getDate()} ${module.monthNames[date.getMonth()]}</p>
+                <p class="label-1">${module.weekDayNames[date.getDay()]}</p>
+                `;
+                forecastSection.querySelector("[data-forecast-list]").appendChild(li);
             }
+
+            loading.style.display = "none";
+            container.style.overflowY = "overlay";
+            container.classList.add("fade-in");
         });
     });
 };
 
-export const error404 = function () {};
+export const error404 = () => {
+    errorContent.style.display = "flex";
+};

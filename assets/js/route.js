@@ -22,7 +22,7 @@ const searchedLocation = (query) => updateWeather(...query.split("&"));
 // updateWeather("lon", "106.7535", "lat", "-6.40719");
 
 const routes = new Map([
-    ["/current-Location", currentLocation],
+    ["/current-location", currentLocation],
     ["/weather", searchedLocation],
 ]);
 
