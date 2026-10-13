@@ -1,8 +1,4 @@
-weatherio
-weatherio is a weather app made by codewithsadee
-
-
-
+#---------- WELCOME ----------#
 #---------- HEADER ----------#
 
 alt = logo

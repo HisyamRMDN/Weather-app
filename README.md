@@ -13,6 +13,7 @@ Sebuah aplikasi web cuaca modern dan responsif yang menyajikan informasi cuaca s
 ## 🛠️ Teknologi yang Digunakan
 
 Aplikasi ini dibangun menggunakan teknologi web standar tanpa framework (Vanilla), sehingga sangat ringan dan cepat:
+
 - **HTML5** - Struktur halaman web.
 - **CSS3** - Penataan gaya (styling) dengan desain kustom yang bersih.
 - **Vanilla JavaScript** - Logika aplikasi, manipulasi DOM, dan integrasi API (`fetch`).
@@ -49,33 +50,43 @@ Weather-app/
 Untuk menjalankan proyek ini di komputer Anda, ikuti langkah-langkah berikut:
 
 ### 1. Clone Repositori
+
 Clone proyek ini ke dalam mesin lokal Anda menggunakan Git:
+
 ```bash
 git clone https://github.com/username-anda/Weather-app.git
 cd Weather-app
 ```
 
 ### 2. Dapatkan API Key OpenWeatherMap
+
 Aplikasi ini memerlukan API Key agar dapat menarik data cuaca.
+
 - Kunjungi [OpenWeatherMap](https://openweathermap.org/api) dan buat akun gratis.
 - Buka dashboard Anda dan dapatkan **API Key**.
 
 ### 3. Konfigurasi API Key
+
 Buka file `assets/js/api.js` (atau tempat konfigurasi API Anda berada) di teks editor favorit Anda (seperti VS Code).
+
 - Cari variabel penyimpan API Key (biasanya bernama `api_key` atau serupa).
 - Masukkan API Key Anda:
+
 ```javascript
 const api_key = "MASUKKAN_API_KEY_ANDA_DI_SINI";
 ```
 
 ### 4. Jalankan Aplikasi
+
 Karena aplikasi ini menggunakan modul JavaScript (`type="module"`), Anda tidak bisa membukanya langsung dengan klik dua kali (protokol `file://`). Anda harus menjalankannya melalui local server.
+
 - **Menggunakan VS Code**: Instal ekstensi [Live Server](https://marketplace.visualstudio.com/items?itemName=ritwickdey.LiveServer). Klik kanan pada `index.html` dan pilih **"Open with Live Server"**.
 - **Menggunakan Python (Alternatif)**: Buka terminal/command prompt di dalam folder proyek, lalu ketik `python -m http.server 8000`. Kemudian buka browser di `http://localhost:8000`.
 
 ## 🤝 Kontribusi
 
 Kontribusi selalu diterima! Jika Anda ingin menambahkan fitur baru, memperbaiki bug, atau meningkatkan desain UI, silakan lakukan langkah berikut:
+
 1. Fork repositori ini.
 2. Buat branch fitur Anda (`git checkout -b fitur/FiturKeren`).
 3. Commit perubahan Anda (`git commit -m 'Menambahkan fitur keren'`).
@@ -83,4 +94,5 @@ Kontribusi selalu diterima! Jika Anda ingin menambahkan fitur baru, memperbaiki 
 5. Buat sebuah **Pull Request**.
 
 ---
-*Dibuat dengan ❤️ untuk mempelajari integrasi API dan Vanilla JavaScript.*
+
+_Dibuat untuk mempelajari integrasi API dan Vanilla JavaScript._
