@@ -1,33 +1,37 @@
 "use strict";
 
-const api_key = "b761155b04c82611c993a8295fbad551";
-
-// Fetch data from API
-// @param {string} URL - API URL
-// @param {function} callback - Callback function
+/**
+ * Fetch data from API
+ * @param {string} URL - API URL
+ * @param {function} callback - Callback function
+ */
 export const fetchData = function (URL, callback) {
-    fetch(`${URL}&appid=${api_key}`)
-        .then((res) => res.json())
-        .then((data) => callback(data));
+    fetch(`/api/weather?url=${encodeURIComponent(URL)}`)
+        .then((res) => {
+            if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+            return res.json();
+        })
+        .then((data) => callback(data))
+        .catch((err) => console.error(err));
 };
 
 export const url = {
     currentWeather(lat, lon) {
-        return `https://api.openweathermap.org/data/2.5/weather?${lat}&${lon}&units=metric&appid=${api_key}`;
+        return `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric`;
     },
     forecast(lat, lon) {
-        return `https://api.openweathermap.org/data/2.5/forecast?${lat}&${lon}&units=metric&appid=${api_key}`;
+        return `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&units=metric`;
     },
     airPollution(lat, lon) {
-        return `https://api.openweathermap.org/data/2.5/air_pollution?${lat}&${lon}&appid=${api_key}`;
+        return `https://api.openweathermap.org/data/2.5/air_pollution?lat=${lat}&lon=${lon}`;
     },
     reverseGeo(lat, lon) {
-        return `http://api.openweathermap.org/geo/1.0/reverse?${lat}&${lon}&limit=5&appid=${api_key}`;
+        return `https://api.openweathermap.org/geo/1.0/reverse?lat=${lat}&lon=${lon}&limit=5`;
     },
-
-    // weather(lat, lon) {
-    // @param {string} query Search query e.g. London
+    /**
+     * @param {string} query Search query e.g. London
+     */
     geo(query) {
-        return `https://api.openweathermap.org/geo/1.0/direct?q=${query}&limit=5&appid=${api_key}`;
+        return `https://api.openweathermap.org/geo/1.0/direct?q=${query}&limit=5`;
     },
 };
