@@ -28,9 +28,6 @@ export const url = {
     reverseGeo(lat, lon) {
         return `https://api.openweathermap.org/geo/1.0/reverse?${lat}&${lon}&limit=5`;
     },
-    /**
-     * @param {string} query Search query e.g. London
-     */
     geo(query) {
         return `https://api.openweathermap.org/geo/1.0/direct?q=${query}&limit=5`;
     },
