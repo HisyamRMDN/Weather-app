@@ -224,6 +224,9 @@ export const updateWeather = function (lat, lon) {
 
     // CURRENT WEATHER SECTION
     fetchData(url.currentWeather(lat, lon), function (currentWeather) {
+        errorContent.style.display = "none";
+        loading.style.display = "grid";
+        container.style.overflowY = "hidden";
         const {
             weather,
             dt: dateUnix,
@@ -261,19 +264,20 @@ export const updateWeather = function (lat, lon) {
         fetchData(url.reverseGeo(lat, lon), function ([{ name, country }]) {
             card.querySelector("[data-location]").innerHTML = `${name}, ${country}`;
         });
-        currentWeatherSection.appendChild(card);
 
         // TODAY'S HIGHLIGHTS
-        fetchData(url.airPollution(lat, lon), function (airPollution) {
-            const [
-                {
-                    main: { aqi },
-                    components: { no2, o3, so2, pm2_5 },
-                },
-            ] = airPollution.list;
-            const card = document.createElement("div");
-            card.classList.add("card", "card-lg");
-            card.innerHTML = `
+        fetchData(
+            url.airPollution(lat, lon),
+            function (airPollution) {
+                const [
+                    {
+                        main: { aqi },
+                        components: { no2, o3, so2, pm2_5 },
+                    },
+                ] = airPollution.list;
+                const card = document.createElement("div");
+                card.classList.add("card", "card-lg");
+                card.innerHTML = `
             <h2 class="title-2" id="highlights-label">Todays Highlights</h2>
                             <div class="highlights-list">
                                 <div class="card card-sm highlights-card one">
@@ -352,8 +356,14 @@ export const updateWeather = function (lat, lon) {
                                 </div>
                             </div>
             `;
-            highlightSection.appendChild(card);
-        });
+                highlightSection.appendChild(card);
+            },
+            function (err) {
+                console.error(err);
+                loading.style.display = "none";
+                error404();
+            },
+        );
 
         // 24 HOURLY FORECAST
         fetchData(url.forecast(lat, lon), function (forecast) {
@@ -433,11 +443,11 @@ export const updateWeather = function (lat, lon) {
                 forecastSection.querySelector("[data-forecast-list]").appendChild(li);
             }
 
+            currentWeatherSection.appendChild(card);
             loading.style.display = "none";
             container.classList.add("fade-in");
+            container.style.overflowY = "overlay";
         });
-
-        // WEATHER CANVAS
     });
 };
 

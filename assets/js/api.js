@@ -5,14 +5,18 @@
  * @param {string} URL - API URL
  * @param {function} callback - Callback function
  */
-export const fetchData = function (URL, callback) {
+export const fetchData = function (URL, callback, errorCallback) {
     fetch(`/api/weather?url=${encodeURIComponent(URL)}`)
         .then((res) => {
             if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
             return res.json();
         })
         .then((data) => callback(data))
-        .catch((err) => console.error(err));
+        .catch((err) => {
+            console.error(err);
+            // Menjalankan fungsi error kustom jika disediakan
+            if (errorCallback) errorCallback(err);
+        });
 };
 
 export const url = {
