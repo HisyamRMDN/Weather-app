@@ -10,6 +10,8 @@ const addEventOnElements = function (elements, eventType, callback) {
     for (const element of elements) element.addEventListener(eventType, callback);
 };
 
+let tempChartInstance = null;
+
 const searchView = document.querySelector("[data-search-view]");
 
 const searchTogglers = document.querySelectorAll("[data-search-togglers]");
@@ -199,11 +201,100 @@ const triggerWeatherEffects = function (icon) {
 
     renderWeatherEffects(effectType);
 };
-/* ==================================================== */
+
+const renderTempChart = (hourlyList) => {
+    const ctx = document.getElementById("tempChart")?.getContext("2d");
+    if (!ctx) return;
+
+    const next24Hours = hourlyList.slice(0, 8);
+    const labels = next24Hours.map((item) => {
+        const date = new Date(item.dt * 1000);
+        return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    });
+    const temps = next24Hours.map((item) => Math.round(item.main.temp));
+
+    if (tempChartInstance) {
+        tempChartInstance.destroy();
+    }
+
+    const gradient = ctx.createLinearGradient(0, 0, 0, 180);
+    gradient.addColorStop(0, "rgba(17, 95, 212, 0.4)");
+    gradient.addColorStop(1, "rgba(17, 95, 212, 0)");
+
+    tempChartInstance = new Chart(ctx, {
+        type: "line",
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: "Suhu (°C)",
+                    data: temps,
+                    borderColor: "#152cb3",
+                    borderWidth: 3,
+                    pointBackgroundColor: "#fff",
+                    pointBorderColor: "#152cb3",
+                    pointRadius: 4,
+                    fill: true,
+                    backgroundColor: gradient,
+                    tension: 0.4, // Garis melengkung halus (smooth curve)
+                },
+            ],
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+            },
+            scales: {
+                x: {
+                    grid: { display: false },
+                    ticks: { color: "#a0a0a0" },
+                },
+                y: {
+                    grid: { color: "rgba(255, 255, 255, 0.05)" },
+                    ticks: { color: "#a0a0a0" },
+                },
+            },
+        },
+    });
+};
+
+// 📍 TARUH DEKLARASI FUNGSI INI DI LUAR updateWeather
+const updateAdvice = (currentWeather) => {
+    const activityEl = document.querySelector("[data-advice-activity]");
+    const outfitEl = document.querySelector("[data-advice-outfit]");
+    const healthEl = document.querySelector("[data-advice-health]");
+
+    if (!activityEl || !outfitEl || !healthEl) return;
+
+    const { temp } = currentWeather.main;
+    const weatherMain = currentWeather.weather[0].main.toLowerCase();
+
+    if (weatherMain.includes("rain") || weatherMain.includes("drizzle") || weatherMain.includes("thunderstorm")) {
+        activityEl.innerText = "Utamakan Aktivitas Indoor";
+        outfitEl.innerText = "Bawa Payung & Jas Hujan";
+        healthEl.innerText = "Hati-hati Jalan Licin";
+    } else if (temp >= 32) {
+        activityEl.innerText = "Gunakan Sunscreen Saat Keluar";
+        outfitEl.innerText = "Pakaian Tipis & Baju Cerah";
+        healthEl.innerText = "Perbanyak Minum Air Putih";
+    } else if (temp <= 20) {
+        activityEl.innerText = "Cukup Nyaman Buat Jalan Santai";
+        outfitEl.innerText = "Gunakan Jaket / Sweater";
+        healthEl.innerText = "Jaga Suhu Tubuh Tetap Hangat";
+    } else {
+        activityEl.innerText = "Sangat Cocok Olahraga Outdoor";
+        outfitEl.innerText = "Pakaian Kasual Nyaman";
+        healthEl.innerText = "Kondisi Udara & Suhu Ideal";
+    }
+};
 
 // @params {string} lat - latitude
 // @params {string} lon - longitude
 export const updateWeather = function (lat, lon) {
+    loading.style.display = "grid";
+
     errorContent.style.display = "none";
 
     const currentWeatherSection = document.querySelector("[data-current-weather]");
@@ -261,9 +352,19 @@ export const updateWeather = function (lat, lon) {
                 </li>
             </ul>
             `;
-        fetchData(url.reverseGeo(lat, lon), function ([{ name, country }]) {
-            card.querySelector("[data-location]").innerHTML = `${name}, ${country}`;
-        });
+        fetchData(
+            url.reverseGeo(lat, lon),
+            function ([{ name, country }]) {
+                card.querySelector("[data-location]").innerHTML = `${name}, ${country}`;
+            },
+            function (err) {
+                console.error(err);
+                loading.style.display = "none";
+                error404();
+            },
+        );
+
+        updateAdvice(currentWeather);
 
         // TODAY'S HIGHLIGHTS
         fetchData(
@@ -366,13 +467,15 @@ export const updateWeather = function (lat, lon) {
         );
 
         // 24 HOURLY FORECAST
-        fetchData(url.forecast(lat, lon), function (forecast) {
-            console.log("Data API Forecast:", forecast);
-            const {
-                list: forecastList,
-                city: { timezone },
-            } = forecast;
-            hourlyForecastSection.innerHTML = `
+        fetchData(
+            url.forecast(lat, lon),
+            function (forecast) {
+                console.log("Data API Forecast:", forecast);
+                const {
+                    list: forecastList,
+                    city: { timezone },
+                } = forecast;
+                hourlyForecastSection.innerHTML = `
             <h2 class="title-2">Today At</h2>
                         <div class="slider-container">
                             <ul class="slider-list" data-temp>
@@ -381,56 +484,56 @@ export const updateWeather = function (lat, lon) {
                             </ul>
                         </div>
             `;
-            for (const [index, data] of forecastList.entries()) {
-                if (index > 7) break;
-                const {
-                    dt: dateUnix,
-                    main: { temp },
-                    weather,
-                    wind: { deg: windDirection, speed: windSpeed },
-                } = data;
-                const [{ description, icon }] = weather;
-                const tempLi = document.createElement("li");
-                tempLi.classList.add("slider-item");
-                tempLi.innerHTML = `
+                for (const [index, data] of forecastList.entries()) {
+                    if (index > 7) break;
+                    const {
+                        dt: dateUnix,
+                        main: { temp },
+                        weather,
+                        wind: { deg: windDirection, speed: windSpeed },
+                    } = data;
+                    const [{ description, icon }] = weather;
+                    const tempLi = document.createElement("li");
+                    tempLi.className = "slider-item animate-card";
+                    tempLi.innerHTML = `
                 <div class="card card-sm slider-card">
                     <p class="body-3">${module.getTime(dateUnix, timezone)}</p>
                     <img src="./assets/images/weather_icons/${icon}.png" width="48" height="48" loading="lazy" alt="${description}" class="weather-icon" title="${description}" />
                     <p class="body-3">${parseInt(temp)}&deg<sup>c</sup></p>
                 </div>
                 `;
-                hourlyForecastSection.querySelector("[data-temp]").appendChild(tempLi);
-                const windLi = document.createElement("li");
-                windLi.classList.add("slider-item");
-                windLi.innerHTML = `
+                    hourlyForecastSection.querySelector("[data-temp]").appendChild(tempLi);
+                    const windLi = document.createElement("li");
+                    windLi.className = "slider-item animate-card";
+                    windLi.innerHTML = `
                 <div class="card card-sm slider-card">
                     <p class="body-3">${module.getTime(dateUnix, timezone)}</p>
                     <img src="./assets/images/weather_icons/direction.png" width="48" height="48" loading="lazy" alt="Direction" class="weather-icon" style="transform: rotate(${windDirection - 180}deg)" title="Wind direction" />
                     <p class="body-3">${parseInt(module.mps_to_kph(windSpeed))}km/h</p>
                 </div>
                 `;
-                hourlyForecastSection.querySelector("[data-wind]").appendChild(windLi);
-            }
-            // 5 DAY FORECAST
-            forecastSection.innerHTML = `
+                    hourlyForecastSection.querySelector("[data-wind]").appendChild(windLi);
+                }
+                // 5 DAY FORECAST
+                forecastSection.innerHTML = `
             <h2 class="title-2">5 DAYS FORECAST</h2>
             <div class="card card-lg forecast-card">
                 <ul data-forecast-list>
                 </ul>
             </div>
             `;
-            for (let i = 7, len = forecastList.length; i < len; i += 8) {
-                const {
-                    main: { temp_max },
-                    weather,
-                    dt_txt,
-                } = forecastList[i];
-                const [{ description, icon }] = weather;
-                const date = new Date(dt_txt);
+                for (let i = 7, len = forecastList.length; i < len; i += 8) {
+                    const {
+                        main: { temp_max },
+                        weather,
+                        dt_txt,
+                    } = forecastList[i];
+                    const [{ description, icon }] = weather;
+                    const date = new Date(dt_txt);
 
-                const li = document.createElement("li");
-                li.classList.add("card-item");
-                li.innerHTML = `
+                    const li = document.createElement("li");
+                    li.className = "card-item animate-card";
+                    li.innerHTML = `
                 <div class="icon-wrapper">
                     <img src="./assets/images/weather_icons/${icon}.png" width="36" height="36" alt="${description}" class="weather-icon" title="${description}" />
                     <span class="span">
@@ -440,17 +543,24 @@ export const updateWeather = function (lat, lon) {
                 <p class="label-1">${date.getDate()} ${module.monthNames[date.getMonth()]}</p>
                 <p class="label-1">${module.weekDayNames[date.getDay()]}</p>
                 `;
-                forecastSection.querySelector("[data-forecast-list]").appendChild(li);
-            }
+                    forecastSection.querySelector("[data-forecast-list]").appendChild(li);
+                    renderTempChart(forecast.list);
+                }
 
-            currentWeatherSection.appendChild(card);
-            loading.style.display = "none";
-            container.classList.add("fade-in");
-            container.style.overflowY = "overlay";
-        });
+                currentWeatherSection.appendChild(card);
+                loading.style.display = "none";
+                container.style.overflowY = "overlay";
+            },
+            function (err) {
+                console.error(err);
+                loading.style.display = "none";
+                error404();
+            },
+        );
     });
 };
 
 export const error404 = () => {
+    container.style.display = "none";
     errorContent.style.display = "flex";
 };

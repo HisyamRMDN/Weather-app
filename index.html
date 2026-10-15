@@ -21,6 +21,7 @@
         <script src="./assets/js/app.js" type="module"></script>
         <script src="./assets/js/route.js" type="module"></script>
         <script src="./assets/js/particles.js" type="module"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     </head>
     <body>
         <canvas id="weather-canvas" class="weather-canvas"></canvas>
@@ -62,6 +63,39 @@
                     <!-- CURRENT WEATHER -->
                     <!-- FORECAST -->
                     <section class="forecast section" aria-label="forecast" data-5-day-forecast></section>
+                    <!-- Today's Advice -->
+                    <section class="section advice" aria-label="advice" data-advice>
+                        <!-- TODAY'S ADVICE CARD -->
+                        <div class="card advice-card animate-card">
+                            <h2 class="title-2">Today's Advice</h2>
+
+                            <ul class="advice-list">
+                                <li class="advice-item">
+                                    <span class="m-icon">directions_run</span>
+                                    <div>
+                                        <p class="label">Aktivitas Outdoor</p>
+                                        <p class="value" data-advice-activity>Memuat rekomendasi...</p>
+                                    </div>
+                                </li>
+
+                                <li class="advice-item">
+                                    <span class="m-icon">checkroom</span>
+                                    <div>
+                                        <p class="label">Persiapan</p>
+                                        <p class="value" data-advice-outfit>Memuat rekomendasi...</p>
+                                    </div>
+                                </li>
+
+                                <li class="advice-item">
+                                    <span class="m-icon">health_and_safety</span>
+                                    <div>
+                                        <p class="label">Kesehatan</p>
+                                        <p class="value" data-advice-health>Memuat rekomendasi...</p>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </section>
                 </div>
 
                 <div class="content-right">
@@ -70,6 +104,16 @@
 
                     <!-- HOURLY FORECAST -->
                     <section class="section hourly-forecast" aria-label="hourly forecast label" data-hourly-forecast></section>
+
+                    <!-- CHART -->
+                    <section class="section chart" aria-label="chart" data-chart>
+                        <div class="card chart-card animate-card" style="padding: 20px; margin-top: 16px">
+                            <h3 class="title-2" style="margin-bottom: 12px; color: var(--on-surface-variant)">Tren Suhu 24 Jam</h3>
+                            <div style="position: relative; height: 180px; width: 100%">
+                                <canvas id="tempChart"></canvas>
+                            </div>
+                        </div>
+                    </section>
 
                     <!-- FOOTER -->
                     <footer class="footer">

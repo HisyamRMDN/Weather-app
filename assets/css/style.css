@@ -634,6 +634,58 @@ article.container::before {
 }
 
 /*-----------------------------------*\
+  #TODAY'S ADVICE
+\*-----------------------------------*/
+/* TODAY'S ADVICE WIDGET */
+/* TODAY'S ADVICE WIDGET */
+.advice-card {
+    margin-top: 16px;
+    padding: 20px;
+}
+
+.advice-card .title-2 {
+    margin-bottom: 16px;
+    color: var(--on-surface-variant);
+}
+
+.advice-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.advice-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 10px 14px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    transition: background 0.3s ease;
+}
+
+.advice-item:hover {
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.advice-item .m-icon {
+    font-size: 26px;
+    color: var(--primary);
+}
+
+.advice-item .label {
+    font-size: 1.2rem;
+    color: var(--on-surface-variant-2);
+}
+
+.advice-item .value {
+    font-size: 1.3rem;
+    font-weight: 500;
+    color: var(--on-surface);
+}
+
+/*-----------------------------------*\
   #HIGHLIGHT
 \*-----------------------------------*/
 
