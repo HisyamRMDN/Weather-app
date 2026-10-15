@@ -74,9 +74,6 @@ const loading = document.querySelector("[data-loading]");
 const currentLocationBtn = document.querySelector("[data-current-location-btn]");
 const errorContent = document.querySelector("[data-error-content]");
 
-/* ====================================================
-   MESIN CANVAS EFEK CUACA (TANPA UBAH BACKGROUND)
-   ==================================================== */
 const canvas = document.getElementById("weather-canvas");
 const ctx = canvas.getContext("2d");
 let particles = [];
@@ -89,9 +86,6 @@ const resizeCanvas = () => {
 window.addEventListener("resize", resizeCanvas);
 resizeCanvas();
 
-/* ====================================================
-   MESIN CANVAS EFEK CUACA (VERSI LENGKAP)
-   ==================================================== */
 const renderWeatherEffects = (type) => {
     if (weatherAnimationId) cancelAnimationFrame(weatherAnimationId);
     particles = [];
@@ -185,7 +179,6 @@ const renderWeatherEffects = (type) => {
     draw();
 };
 
-// Fungsi Trigger Logika Cuaca
 const triggerWeatherEffects = function (icon) {
     let effectType = "clear";
 
@@ -327,13 +320,10 @@ export const updateWeather = function (lat, lon) {
             timezone,
         } = currentWeather;
         const [{ description, icon }] = weather;
-        console.log("Ikon cuaca terdeteksi:", icon);
-
         triggerWeatherEffects(icon);
-        console.log("Fungsi trigger efek sudah dilewati!");
 
         const card = document.createElement("div");
-        card.classList.add("card", "card-lg", "current-weather-card");
+        card.className = "card card-lg current-weather-card animate-card";
         card.innerHTML = `
             <h2 class="title-2 card-title">NOW</h2>
             <div class="wrapper">
@@ -377,7 +367,7 @@ export const updateWeather = function (lat, lon) {
                     },
                 ] = airPollution.list;
                 const card = document.createElement("div");
-                card.classList.add("card", "card-lg");
+                card.className = "card card-lg animate-card";
                 card.innerHTML = `
             <h2 class="title-2" id="highlights-label">Todays Highlights</h2>
                             <div class="highlights-list">
