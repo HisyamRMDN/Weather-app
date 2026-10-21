@@ -3,6 +3,44 @@
 import { fetchData, url } from "./api.js";
 import * as module from "./module.js";
 
+// ---------------------------------------------------------------------------
+// DOM Helper: membangun elemen secara eksklusif dengan DOM API standar
+// (document.createElement, textContent, classList.add, setAttribute, append).
+// Tidak ada innerHTML / penyisipan string HTML mentah di seluruh file ini.
+// ---------------------------------------------------------------------------
+
+const $ = (tag, options = {}) => {
+    const { text, class: className, attrs = {}, children = [] } = options;
+    const el = document.createElement(tag);
+    if (text !== undefined) el.textContent = text;
+    if (className) el.classList.add(...String(className).split(/\s+/));
+    for (const [key, value] of Object.entries(attrs)) {
+        el.setAttribute(key, value);
+    }
+    for (const child of children) el.append(child);
+    return el;
+};
+
+// Teks dengan elemen <sup> (contoh: "25\u00B0c")
+const withSup = (text, supText) => {
+    const span = document.createElement("span");
+    span.textContent = text;
+    const sup = document.createElement("sup");
+    sup.textContent = supText;
+    span.append(sup);
+    return span;
+};
+
+// Teks dengan elemen <sub> (contoh: "60%")
+const withSub = (text, subText) => {
+    const span = document.createElement("span");
+    span.textContent = text;
+    const sub = document.createElement("sub");
+    sub.textContent = subText;
+    span.append(sub);
+    return span;
+};
+
 const addEventOnElements = function (elements, eventType, callback) {
     // @params {Nodelist} elements - NodeList of elements
     // @params {string} eventType - Event type
@@ -31,7 +69,7 @@ searchField.addEventListener("input", function () {
 
     if (!searchField.value) {
         searchResult.classList.remove("active");
-        searchResult.innerHTML = "";
+        searchResult.textContent = "";
         searchField.classList.remove("searching");
     } else {
         searchField.classList.add("searching");
@@ -42,24 +80,41 @@ searchField.addEventListener("input", function () {
             fetchData(url.geo(searchField.value), function (locations) {
                 searchField.classList.remove("searching");
                 searchResult.classList.add("active");
-                searchResult.innerHTML = ` <ul class="view-list" data-search-list></ul> `;
+                searchResult.textContent = "";
+
+                const searchList = $("ul", {
+                    class: "view-list",
+                    attrs: { "data-search-list": "" },
+                });
+                searchResult.append(searchList);
+
                 const items = [];
                 for (const { name, lat, lon, country, state } of locations) {
-                    const searchItem = document.createElement("li");
-                    searchItem.classList.add("view-item");
-                    searchItem.innerHTML = `
-                        <span class="m-icon">location_on</span>
+                    const searchItem = $("li", { class: "view-item" });
+                    const icon = $("span", { class: "m-icon", text: "location_on" });
 
-                        <div>
-                            <p class="item-title">${name}</p>
-                            <p class="label-2 item-subtitle">${state || ""} ${country}</p>
-                        </div>
+                    const infoDiv = $("div");
+                    const title = $("p", { class: "item-title", text: name });
+                    const subtitle = $("p", {
+                        class: "label-2 item-subtitle",
+                        text: `${state || ""} ${country}`,
+                    });
+                    infoDiv.append(title, subtitle);
 
-                        <a href="#/weather?lat=${lat}&lon=${lon}" class="item-link has-state" aria-label="${name} weather" data-search-togglers></a>
-                    `;
-                    searchResult.querySelector("[data-search-list]").appendChild(searchItem);
-                    items.push(searchItem.querySelector("[data-search-togglers]"));
+                    const link = $("a", {
+                        class: "item-link has-state",
+                        attrs: {
+                            href: `#/weather?lat=${lat}&lon=${lon}`,
+                            "aria-label": `${name} weather`,
+                            "data-search-togglers": "",
+                        },
+                    });
+
+                    searchItem.append(icon, infoDiv, link);
+                    searchList.append(searchItem);
+                    items.push(link);
                 }
+
                 addEventOnElements(items, "click", function () {
                     toggleSearch();
                     searchResult.classList.remove("active");
@@ -220,7 +275,7 @@ const renderTempChart = (hourlyList) => {
             labels: labels,
             datasets: [
                 {
-                    label: "Suhu (°C)",
+                    label: "Suhu (\u00B0C)",
                     data: temps,
                     borderColor: "#152cb3",
                     borderWidth: 3,
@@ -253,7 +308,7 @@ const renderTempChart = (hourlyList) => {
     });
 };
 
-// 📍 TARUH DEKLARASI FUNGSI INI DI LUAR updateWeather
+// ?? TARUH DEKLARASI FUNGSI INI DI LUAR updateWeather
 const updateAdvice = (currentWeather) => {
     const activityEl = document.querySelector("[data-advice-activity]");
     const outfitEl = document.querySelector("[data-advice-outfit]");
@@ -265,21 +320,21 @@ const updateAdvice = (currentWeather) => {
     const weatherMain = currentWeather.weather[0].main.toLowerCase();
 
     if (weatherMain.includes("rain") || weatherMain.includes("drizzle") || weatherMain.includes("thunderstorm")) {
-        activityEl.innerText = "Utamakan Aktivitas Indoor";
-        outfitEl.innerText = "Bawa Payung & Jas Hujan";
-        healthEl.innerText = "Hati-hati Jalan Licin";
+        activityEl.textContent = "Utamakan Aktivitas Indoor";
+        outfitEl.textContent = "Bawa Payung & Jas Hujan";
+        healthEl.textContent = "Hati-hati Jalan Licin";
     } else if (temp >= 32) {
-        activityEl.innerText = "Gunakan Sunscreen Saat Keluar";
-        outfitEl.innerText = "Pakaian Tipis & Baju Cerah";
-        healthEl.innerText = "Perbanyak Minum Air Putih";
+        activityEl.textContent = "Gunakan Sunscreen Saat Keluar";
+        outfitEl.textContent = "Pakaian Tipis & Baju Cerah";
+        healthEl.textContent = "Perbanyak Minum Air Putih";
     } else if (temp <= 20) {
-        activityEl.innerText = "Cukup Nyaman Buat Jalan Santai";
-        outfitEl.innerText = "Gunakan Jaket / Sweater";
-        healthEl.innerText = "Jaga Suhu Tubuh Tetap Hangat";
+        activityEl.textContent = "Cukup Nyaman Buat Jalan Santai";
+        outfitEl.textContent = "Gunakan Jaket / Sweater";
+        healthEl.textContent = "Jaga Suhu Tubuh Tetap Hangat";
     } else {
-        activityEl.innerText = "Sangat Cocok Olahraga Outdoor";
-        outfitEl.innerText = "Pakaian Kasual Nyaman";
-        healthEl.innerText = "Kondisi Udara & Suhu Ideal";
+        activityEl.textContent = "Sangat Cocok Olahraga Outdoor";
+        outfitEl.textContent = "Pakaian Kasual Nyaman";
+        healthEl.textContent = "Kondisi Udara & Suhu Ideal";
     }
 };
 
@@ -295,10 +350,10 @@ export const updateWeather = function (lat, lon) {
     const hourlyForecastSection = document.querySelector("[data-hourly-forecast]");
     const forecastSection = document.querySelector("[data-5-day-forecast]");
 
-    currentWeatherSection.innerHTML = "";
-    highlightSection.innerHTML = "";
-    hourlyForecastSection.innerHTML = "";
-    forecastSection.innerHTML = "";
+    currentWeatherSection.textContent = "";
+    highlightSection.textContent = "";
+    hourlyForecastSection.textContent = "";
+    forecastSection.textContent = "";
 
     if (window.location.hash === "#/current-location") {
         currentLocationBtn.setAttribute("disabled", "");
@@ -322,30 +377,57 @@ export const updateWeather = function (lat, lon) {
         const [{ description, icon }] = weather;
         triggerWeatherEffects(icon);
 
-        const card = document.createElement("div");
-        card.className = "card card-lg current-weather-card animate-card";
-        card.innerHTML = `
-            <h2 class="title-2 card-title">NOW</h2>
-            <div class="wrapper">
-                <p class="heading">${parseInt(temp)}&deg<sup>c</sup></p>
-                <img src="./assets/images/weather_icons/${icon}.png" width="64" height="64" alt="${description}" class="weather-icon" title="" />
-            </div>
-            <p class="body-3">${description}</p>
-            <ul class="meta-list">
-                <li class="meta-item">
-                    <span class="m-icon">Calendar_today</span>
-                    <p class="title-3 meta-text">${module.getDate(dateUnix, timezone)}</p>
-                </li>
-                <li class="meta-item">
-                    <span class="m-icon">Location_on</span>
-                    <p class="title-3 meta-text" data-location></p>
-                </li>
-            </ul>
-            `;
+        const card = $("div", { class: "card card-lg current-weather-card animate-card" });
+
+        const cardTitle = $("h2", { class: "title-2 card-title", text: "NOW" });
+
+        const wrapper = $("div", { class: "wrapper" });
+        const tempHeading = $("p", { class: "heading" });
+        tempHeading.textContent = `${parseInt(temp)}\u00B0`;
+        const tempSup = document.createElement("sup");
+        tempSup.textContent = "c";
+        tempHeading.append(tempSup);
+        const iconImg = $("img", {
+            class: "weather-icon",
+            attrs: {
+                src: `./assets/images/weather_icons/${icon}.png`,
+                width: "64",
+                height: "64",
+                alt: description,
+                title: "",
+            },
+        });
+        wrapper.append(tempHeading, iconImg);
+
+        const descriptionP = $("p", { class: "body-3", text: description });
+
+        const metaList = $("ul", { class: "meta-list" });
+
+        const metaItem1 = $("li", { class: "meta-item" });
+        const metaIcon1 = $("span", { class: "m-icon", text: "Calendar_today" });
+        const metaText1 = $("p", {
+            class: "title-3 meta-text",
+            text: module.getDate(dateUnix, timezone),
+        });
+        metaItem1.append(metaIcon1, metaText1);
+
+        const metaItem2 = $("li", { class: "meta-item" });
+        const metaIcon2 = $("span", { class: "m-icon", text: "Location_on" });
+        const metaText2 = $("p", {
+            class: "title-3 meta-text",
+            attrs: { "data-location": "" },
+        });
+        metaItem2.append(metaIcon2, metaText2);
+
+        metaList.append(metaItem1, metaItem2);
+
+        card.append(cardTitle, wrapper, descriptionP, metaList);
+
         fetchData(
             url.reverseGeo(lat, lon),
             function ([{ name, country }]) {
-                card.querySelector("[data-location]").innerHTML = `${name}, ${country}`;
+                const locationEl = card.querySelector("[data-location]");
+                locationEl.textContent = `${name}, ${country}`;
             },
             function (err) {
                 console.error(err);
@@ -366,87 +448,116 @@ export const updateWeather = function (lat, lon) {
                         components: { no2, o3, so2, pm2_5 },
                     },
                 ] = airPollution.list;
-                const card = document.createElement("div");
-                card.className = "card card-lg animate-card";
-                card.innerHTML = `
-            <h2 class="title-2" id="highlights-label">Todays Highlights</h2>
-                            <div class="highlights-list">
-                                <div class="card card-sm highlights-card one">
-                                    <h3 class="title-3">Air Quality Index</h3>
-                                    <div class="wrapper">
-                                        <span class="m-icon">air</span>
-                                        <ul class="card-list">
-                                            <li class="card-item">
-                                                <p class="title-1">${Number(pm2_5).toPrecision(3)}</p>
-                                                <p class="label-1">PM <sub></sub></p>
-                                            </li>
-                                            <li class="card-item">
-                                                <p class="title-1">${Number(so2).toPrecision(3)}</p>
-                                                <p class="label-1">SO<sub>2</sub></p>
-                                            </li>
-                                            <li class="card-item">
-                                                <p class="title-1">${Number(no2).toPrecision(3)}</p>
-                                                <p class="label-1">NO<sub>2</sub></p>
-                                            </li>
-                                            <li class="card-item">
-                                                <p class="title-1">${Number(o3).toPrecision(3)}</p>
-                                                <p class="label-1">O<sub>3</sub></p>
-                                            </li>
-                                        </ul>
-                                    </div>
-                                    <span class="badge aqi-${aqi} label-${aqi}" title="${module.aqiText[aqi].message}">${module.aqiText[aqi].level}</span>
-                                </div>
+                const card = $("div", { class: "card card-lg animate-card" });
 
-                                <div class="card card-sm highlights-card two">
-                                    <h3 class="title-3">Sunrise & Sunset</h3>
-                                    <div class="card-list">
-                                        <div class="card-item">
-                                            <span class="m-icon">clear_day</span>
-                                            <div>
-                                                <p class="label-1">Sunrise</p>
-                                                <p class="title-1">${module.getTime(sunriseUnix, timezone)}</p>
-                                            </div>
-                                        </div>
-                                        <div class="card-item">
-                                            <span class="m-icon">clear_night</span>
-                                            <div>
-                                                <p class="label-1">Sunset</p>
-                                                <p class="title-1">${module.getTime(sunsetUnix, timezone)}</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                const highlightsTitle = $("h2", {
+                    class: "title-2",
+                    attrs: { id: "highlights-label" },
+                    text: "Todays Highlights",
+                });
 
-                                <div class="card card-sm highlights-card">
-                                    <h3 class="title-3">Humidity</h3>
-                                    <div class="wrapper">
-                                        <span class="m-icon">humidity_percentage</span>
-                                        <p class="title-1">${humidity}<sub>%</sub></p>
-                                    </div>
-                                </div>
-                                <div class="card card-sm highlights-card">
-                                    <h3 class="title-3">Pressure</h3>
-                                    <div class="wrapper">
-                                        <span class="m-icon">airwave</span>
-                                        <p class="title-1">${pressure}<sub>hPa</sub></p>
-                                    </div>
-                                </div>
-                                <div class="card card-sm highlights-card">
-                                    <h3 class="title-3">Visibility</h3>
-                                    <div class="wrapper">
-                                        <span class="m-icon">visibility</span>
-                                        <p class="title-1">${visibility / 1000}<sub>Km</sub></p>
-                                    </div>
-                                </div>
-                                <div class="card card-sm highlights-card">
-                                    <h3 class="title-3">Feels Like</h3>
-                                    <div class="wrapper">
-                                        <span class="m-icon">Thermostat</span>
-                                        <p class="title-1">${parseInt(feels_like)}&deg<sup>c</sup></p>
-                                    </div>
-                                </div>
-                            </div>
-            `;
+                const highlightsList = $("div", { class: "highlights-list" });
+
+                // ---- Air Quality Index ----
+                const aqiCard = $("div", { class: "card card-sm highlights-card one" });
+                const aqiTitle = $("h3", { class: "title-3", text: "Air Quality Index" });
+                const aqiWrapper = $("div", { class: "wrapper" });
+                const aqiIcon = $("span", { class: "m-icon", text: "air" });
+                const aqiList = $("ul", { class: "card-list" });
+
+                const aqiItems = [
+                    { label: "PM", value: Number(pm2_5).toPrecision(3), sub: "" },
+                    { label: "SO", value: Number(so2).toPrecision(3), sub: "2" },
+                    { label: "NO", value: Number(no2).toPrecision(3), sub: "2" },
+                    { label: "O", value: Number(o3).toPrecision(3), sub: "3" },
+                ];
+                for (const { label, value, sub } of aqiItems) {
+                    const li = $("li", { class: "card-item" });
+                    const valP = $("p", { class: "title-1", text: value });
+                    const labelP = $("p", { class: "label-1" });
+                    labelP.textContent = `${label} `;
+                    const subEl = document.createElement("sub");
+                    subEl.textContent = sub;
+                    labelP.append(subEl);
+                    li.append(valP, labelP);
+                    aqiList.append(li);
+                }
+
+                aqiWrapper.append(aqiIcon, aqiList);
+
+                const badge = $("span", {
+                    class: `badge aqi-${aqi} label-${aqi}`,
+                    attrs: { title: module.aqiText[aqi].message },
+                    text: module.aqiText[aqi].level,
+                });
+
+                aqiCard.append(aqiTitle, aqiWrapper, badge);
+                highlightsList.append(aqiCard);
+
+                // ---- Sunrise & Sunset ----
+                const sunCard = $("div", { class: "card card-sm highlights-card two" });
+                const sunTitle = $("h3", { class: "title-3", text: "Sunrise & Sunset" });
+                const sunList = $("div", { class: "card-list" });
+
+                const sunItems = [
+                    { icon: "clear_day", label: "Sunrise", time: module.getTime(sunriseUnix, timezone) },
+                    { icon: "clear_night", label: "Sunset", time: module.getTime(sunsetUnix, timezone) },
+                ];
+                for (const { icon: mIcon, label, time } of sunItems) {
+                    const item = $("div", { class: "card-item" });
+                    const mIconEl = $("span", { class: "m-icon", text: mIcon });
+                    const infoDiv = $("div");
+                    const labelP = $("p", { class: "label-1", text: label });
+                    const timeP = $("p", { class: "title-1", text: time });
+                    infoDiv.append(labelP, timeP);
+                    item.append(mIconEl, infoDiv);
+                    sunList.append(item);
+                }
+
+                sunCard.append(sunTitle, sunList);
+                highlightsList.append(sunCard);
+
+                // ---- Humidity ----
+                const humCard = $("div", { class: "card card-sm highlights-card" });
+                const humTitle = $("h3", { class: "title-3", text: "Humidity" });
+                const humWrapper = $("div", { class: "wrapper" });
+                const humIcon = $("span", { class: "m-icon", text: "humidity_percentage" });
+                const humVal = withSub(`${humidity}`, "%");
+                humWrapper.append(humIcon, humVal);
+                humCard.append(humTitle, humWrapper);
+                highlightsList.append(humCard);
+
+                // ---- Pressure ----
+                const presCard = $("div", { class: "card card-sm highlights-card" });
+                const presTitle = $("h3", { class: "title-3", text: "Pressure" });
+                const presWrapper = $("div", { class: "wrapper" });
+                const presIcon = $("span", { class: "m-icon", text: "airwave" });
+                const presVal = withSub(`${pressure}`, "hPa");
+                presWrapper.append(presIcon, presVal);
+                presCard.append(presTitle, presWrapper);
+                highlightsList.append(presCard);
+
+                // ---- Visibility ----
+                const visCard = $("div", { class: "card card-sm highlights-card" });
+                const visTitle = $("h3", { class: "title-3", text: "Visibility" });
+                const visWrapper = $("div", { class: "wrapper" });
+                const visIcon = $("span", { class: "m-icon", text: "visibility" });
+                const visVal = withSub(`${visibility / 1000}`, "Km");
+                visWrapper.append(visIcon, visVal);
+                visCard.append(visTitle, visWrapper);
+                highlightsList.append(visCard);
+
+                // ---- Feels Like ----
+                const feelCard = $("div", { class: "card card-sm highlights-card" });
+                const feelTitle = $("h3", { class: "title-3", text: "Feels Like" });
+                const feelWrapper = $("div", { class: "wrapper" });
+                const feelIcon = $("span", { class: "m-icon", text: "Thermostat" });
+                const feelVal = withSup(`${parseInt(feels_like)}\u00B0`, "c");
+                feelWrapper.append(feelIcon, feelVal);
+                feelCard.append(feelTitle, feelWrapper);
+                highlightsList.append(feelCard);
+
+                card.append(highlightsTitle, highlightsList);
                 highlightSection.appendChild(card);
             },
             function (err) {
@@ -465,15 +576,16 @@ export const updateWeather = function (lat, lon) {
                     list: forecastList,
                     city: { timezone },
                 } = forecast;
-                hourlyForecastSection.innerHTML = `
-            <h2 class="title-2">Today At</h2>
-                        <div class="slider-container">
-                            <ul class="slider-list" data-temp>
-                            </ul>
-                            <ul class="slider-list" data-wind>
-                            </ul>
-                        </div>
-            `;
+
+                hourlyForecastSection.textContent = "";
+
+                const hourlyTitle = $("h2", { class: "title-2", text: "Today At" });
+                const sliderContainer = $("div", { class: "slider-container" });
+                const tempList = $("ul", { class: "slider-list", attrs: { "data-temp": "" } });
+                const windList = $("ul", { class: "slider-list", attrs: { "data-wind": "" } });
+                sliderContainer.append(tempList, windList);
+                hourlyForecastSection.append(hourlyTitle, sliderContainer);
+
                 for (const [index, data] of forecastList.entries()) {
                     if (index > 7) break;
                     const {
@@ -483,35 +595,56 @@ export const updateWeather = function (lat, lon) {
                         wind: { deg: windDirection, speed: windSpeed },
                     } = data;
                     const [{ description, icon }] = weather;
-                    const tempLi = document.createElement("li");
-                    tempLi.className = "slider-item animate-card";
-                    tempLi.innerHTML = `
-                <div class="card card-sm slider-card">
-                    <p class="body-3">${module.getTime(dateUnix, timezone)}</p>
-                    <img src="./assets/images/weather_icons/${icon}.png" width="48" height="48" loading="lazy" alt="${description}" class="weather-icon" title="${description}" />
-                    <p class="body-3">${parseInt(temp)}&deg<sup>c</sup></p>
-                </div>
-                `;
-                    hourlyForecastSection.querySelector("[data-temp]").appendChild(tempLi);
-                    const windLi = document.createElement("li");
-                    windLi.className = "slider-item animate-card";
-                    windLi.innerHTML = `
-                <div class="card card-sm slider-card">
-                    <p class="body-3">${module.getTime(dateUnix, timezone)}</p>
-                    <img src="./assets/images/weather_icons/direction.png" width="48" height="48" loading="lazy" alt="Direction" class="weather-icon" style="transform: rotate(${windDirection - 180}deg)" title="Wind direction" />
-                    <p class="body-3">${parseInt(module.mps_to_kph(windSpeed))}km/h</p>
-                </div>
-                `;
-                    hourlyForecastSection.querySelector("[data-wind]").appendChild(windLi);
+
+                    const tempLi = $("li", { class: "slider-item animate-card" });
+                    const tempCard = $("div", { class: "card card-sm slider-card" });
+                    const tempTime = $("p", { class: "body-3", text: module.getTime(dateUnix, timezone) });
+                    const tempIcon = $("img", {
+                        class: "weather-icon",
+                        attrs: {
+                            src: `./assets/images/weather_icons/${icon}.png`,
+                            width: "48",
+                            height: "48",
+                            loading: "lazy",
+                            alt: description,
+                            title: description,
+                        },
+                    });
+                    const tempVal = withSup(`${parseInt(temp)}\u00B0`, "c");
+                    tempCard.append(tempTime, tempIcon, tempVal);
+                    tempLi.append(tempCard);
+                    tempList.append(tempLi);
+
+                    const windLi = $("li", { class: "slider-item animate-card" });
+                    const windCard = $("div", { class: "card card-sm slider-card" });
+                    const windTime = $("p", { class: "body-3", text: module.getTime(dateUnix, timezone) });
+                    const windIcon = $("img", {
+                        class: "weather-icon",
+                        attrs: {
+                            src: "./assets/images/weather_icons/direction.png",
+                            width: "48",
+                            height: "48",
+                            loading: "lazy",
+                            alt: "Direction",
+                            title: "Wind direction",
+                            style: `transform: rotate(${windDirection - 180}deg)`,
+                        },
+                    });
+                    const windVal = $("p", { class: "body-3", text: `${parseInt(module.mps_to_kph(windSpeed))}km/h` });
+                    windCard.append(windTime, windIcon, windVal);
+                    windLi.append(windCard);
+                    windList.append(windLi);
                 }
+
                 // 5 DAY FORECAST
-                forecastSection.innerHTML = `
-            <h2 class="title-2">5 DAYS FORECAST</h2>
-            <div class="card card-lg forecast-card">
-                <ul data-forecast-list>
-                </ul>
-            </div>
-            `;
+                forecastSection.textContent = "";
+
+                const forecastTitle = $("h2", { class: "title-2", text: "5 DAYS FORECAST" });
+                const forecastCard = $("div", { class: "card card-lg forecast-card" });
+                const forecastListEl = $("ul", { attrs: { "data-forecast-list": "" } });
+                forecastCard.append(forecastListEl);
+                forecastSection.append(forecastTitle, forecastCard);
+
                 for (let i = 7, len = forecastList.length; i < len; i += 8) {
                     const {
                         main: { temp_max },
@@ -521,19 +654,28 @@ export const updateWeather = function (lat, lon) {
                     const [{ description, icon }] = weather;
                     const date = new Date(dt_txt);
 
-                    const li = document.createElement("li");
-                    li.className = "card-item animate-card";
-                    li.innerHTML = `
-                <div class="icon-wrapper">
-                    <img src="./assets/images/weather_icons/${icon}.png" width="36" height="36" alt="${description}" class="weather-icon" title="${description}" />
-                    <span class="span">
-                        <p class="title-2">${parseInt(temp_max)}&deg;<sup>c</sup></p>
-                    </span>
-                    </div>
-                <p class="label-1">${date.getDate()} ${module.monthNames[date.getMonth()]}</p>
-                <p class="label-1">${module.weekDayNames[date.getDay()]}</p>
-                `;
-                    forecastSection.querySelector("[data-forecast-list]").appendChild(li);
+                    const li = $("li", { class: "card-item animate-card" });
+                    const iconWrapper = $("div", { class: "icon-wrapper" });
+                    const weatherIcon = $("img", {
+                        class: "weather-icon",
+                        attrs: {
+                            src: `./assets/images/weather_icons/${icon}.png`,
+                            width: "36",
+                            height: "36",
+                            alt: description,
+                            title: description,
+                        },
+                    });
+                    const spanEl = $("span", { class: "span" });
+                    const tempMax = withSup(`${parseInt(temp_max)}\u00B0`, "c");
+                    spanEl.append(tempMax);
+                    iconWrapper.append(weatherIcon, spanEl);
+
+                    const dateP = $("p", { class: "label-1", text: `${date.getDate()} ${module.monthNames[date.getMonth()]}` });
+                    const dayP = $("p", { class: "label-1", text: module.weekDayNames[date.getDay()] });
+
+                    li.append(iconWrapper, dateP, dayP);
+                    forecastListEl.append(li);
                     renderTempChart(forecast.list);
                 }
 
